@@ -425,6 +425,11 @@ function renderizarTabelaInsumos() {
 
     document.getElementById('totalMaterialCusto').innerText = totalInsumosGeral.toFixed(2);
     localStorage.setItem('custoTotalInsumos', totalInsumosGeral.toString());
+    
+    // Atualiza imediatamente o campo se ele estiver visível na mesma tela
+    if (document.getElementById('custoTotal')) {
+        carregarEMotorCustoGlobal();
+    }
 }
 
 function removerInsumo(id) {
@@ -435,9 +440,13 @@ function removerInsumo(id) {
 }
 
 // ============================================================================
-// 6. MOTOR DE PRECIFICAÇÃO E CANAIS COMERCIAIS (PÁGINA: precificacao.html)
+// 6. MOTOR DE PRECIFICAÇÃO GLOBAL - VERSÃO INTELIGENTE ANTI-RESET
 // ============================================================================
 function carregarEMotorCustoGlobal() {
+    const campoCustoTotalInput = document.getElementById('custoTotal');
+    if (!campoCustoTotalInput) return;
+
+    // Captura os valores salvos nas memórias das abas anteriores
     const totalProcessos = parseFloat(localStorage.getItem('custoTotalProcessos')) || 0;
     const totalInsumos = parseFloat(localStorage.getItem('custoTotalInsumos')) || 0;
     const custoMinutoImobiliario = parseFloat(localStorage.getItem('custoMinutoImobiliario')) || 0;
@@ -446,10 +455,22 @@ function carregarEMotorCustoGlobal() {
     let tempoTotalMinutos = 0;
     rotas.forEach(p => { tempoTotalMinutos += (p.tempoOperacao + p.tempoSetupRateado); });
 
+    // Calcula o rateio da estrutura predial por tempo de fabricação
     const rateioImobiliario = tempoTotalMinutos * custoMinutoImobiliario;
-    const custoIndustrialAcumulado = totalProcessos + totalInsumos + rateioImobiliario;
     
-    document.getElementById('custoTotal').value = custoIndustrialAcumulado.toFixed(2);
+    // MOTOR DE INTEGRAÇÃO CASCATA: Soma todos os fatores industriais
+    let custoIndustrialAcumulado = totalProcessos + totalInsumos + rateioImobiliario;
+    
+    // FALLBACK DE SEGURANÇA: Se a soma deu zero mas há custos de materiais na tela (como na imagem)
+    if (custoIndustrialAcumulado === 0) {
+        const totalMaterialTexto = document.getElementById('totalMaterialCusto');
+        if (totalMaterialTexto) {
+            custoIndustrialAcumulado = parseFloat(totalMaterialTexto.innerText) || 0;
+        }
+    }
+    
+    // Força a exibição do custo real no campo de simulação
+    campoCustoTotalInput.value = custoIndustrialAcumulado.toFixed(2);
 }
 
 function ajustarMargemPorCanal() {
@@ -528,4 +549,3 @@ function calcularTempoRetorno() {
     box.innerHTML = `<strong>Métricas Consolidadas pela Terceiro Adm:</strong><br>${textoSucesso}`;
     emitirAudioTexto(textoSucesso);
 }
-
