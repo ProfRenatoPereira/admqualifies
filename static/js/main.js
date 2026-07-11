@@ -97,7 +97,6 @@ async function calcularCustosImobiliarios() {
     if (response.ok) {
         const data = await response.json();
         
-        // Persiste os resultados imobiliários na memória estável do navegador
         localStorage.setItem('custoMinutoImobiliario', data.custoMinutoInstalacao);
         localStorage.setItem('totalInvestidoEstrutura', (valor_terreno + custo_edificacao).toString());
 
@@ -107,6 +106,110 @@ async function calcularCustosImobiliarios() {
     } else {
         box.innerHTML = `<p style="color:red;">Erro ao salvar os dados no servidor do Render.</p>`;
     }
+}
+
+// ============================================================================
+// 3. MÓDULO DE ATIVOS & MÁQUINAS (PÁGINA: maquinas.html) - VERSÃO CORRIGIDA
+// ============================================================================
+
+let parqueMaquinas = [];
+let totalInvestidoMaquinas = 0;
+
+async function adicionarMaquinaServidor() {
+    const nome = document.getElementById('maquinaNome').value.trim();
+    const preco = parseFloat(document.getElementById('maquinaPreco').value) || 0;
+    const vidaUtil = parseInt(document.getElementById('maquinaVidaUtil').value) || 1;
+    const valorRevenda = parseFloat(document.getElementById('maquinaValorRevenda').value) || 0;
+    const manutencao = parseFloat(document.getElementById('maquinaManutencao').value) || 0;
+    const horasAno = parseInt(document.getElementById('maquinaHorasAno').value) || 1;
+
+    if (!nome || preco <= 0) {
+        alert("Preencha o nome e o preço do ativo industrial.");
+        return;
+    }
+
+    // CORREÇÃO APLICADA: Alinhado os nomes das chaves para baterem com o backend Flask
+    const response = await fetch('/api/maquinas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            nome: nome, 
+            preco: preco, 
+            vida_util: vidaUtil, // Corrigido de vida_util para vidaUtil
+            valor_revenda: valorRevenda, 
+            manutencao: manutencao, 
+            horas_ano: horasAno 
+        })
+    });
+
+    if (response.ok) {
+        const dadosCalculados = await response.json();
+        
+        let parque = JSON.parse(localStorage.getItem('parqueMaquinas')) || [];
+        parque.push({
+            id: Date.now(),
+            nome: nome,
+            preco: preco,
+            depreciacaoAnual: dadosCalculados.depreciacaoAnual,
+            custoFixoAnual: dadosCalculados.custoFixoAnual,
+            custoMinuto: dadosCalculados.custoMinuto
+        });
+        
+        localStorage.setItem('parqueMaquinas', JSON.stringify(parque));
+        
+        let totalMaquinas = parque.reduce((acc, curr) => acc + curr.preco, 0);
+        localStorage.setItem('totalInvestidoMaquinas', totalMaquinas.toString());
+
+        renderizarTabelaMaquinas();
+        document.getElementById('maquinaNome').value = '';
+        
+        const aviso = `Ativo ${nome} registrado com sucesso no banco de dados.`;
+        emitirAudioTexto(aviso);
+    } else {
+        alert("Falha ao salvar o ativo no banco PostgreSQL.");
+    }
+}
+
+function renderizarTabelaMaquinas() {
+    const tbody = document.querySelector('#tabelaMaquinas tbody');
+    if (!tbody) return;
+    
+    let parque = JSON.parse(localStorage.getItem('parqueMaquinas')) || [];
+    tbody.innerHTML = '';
+    
+    parque.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${m.nome}</td><td>R$ ${m.depreciacaoAnual.toFixed(2)}</td><td>R$ ${m.custoFixoAnual.toFixed(2)}</td><td>R$ ${m.custoMinuto.toFixed(4)}</td><td><button onclick="removerMaquinaLocal(${m.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; cursor:pointer;">Remover</button></td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function removerMaquinaLocal(id) {
+    let parque = JSON.parse(localStorage.getItem('parqueMaquinas')) || [];
+    const maq = parque.find(m => m.id === id);
+    if(maq) totalInvestidoMaquinas -= maq.preco;
+    parque = parque.filter(m => m.id !== id);
+    localStorage.setItem('parqueMaquinas', JSON.stringify(parque));
+    
+    let totalMaquinas = parque.reduce((acc, curr) => acc + curr.preco, 0);
+    localStorage.setItem('totalInvestidoMaquinas', totalMaquinas.toString());
+    
+    renderizarTabelaMaquinas();
+}
+
+function atualizarSelectMaquinas() {
+    const select = document.getElementById('procSelecaoMaquina');
+    if (!select) return;
+    
+    let parque = JSON.parse(localStorage.getItem('parqueMaquinas')) || [];
+    select.innerHTML = '<option value="">-- Selecione uma máquina --</option>';
+    
+    parque.forEach(m => {
+        const option = document.createElement('option');
+        option.value = m.id;
+        option.textContent = m.nome;
+        select.appendChild(option);
+    });
 }
 
 // ============================================================================
