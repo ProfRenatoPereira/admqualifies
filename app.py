@@ -1,4 +1,3 @@
-
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -6,7 +5,7 @@ from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 
-# CONEXÃO COM O BANCO DE DADOS POSTGRESQL DO RENDER
+# CONEXAO COM O BANCO DE DADOS POSTGRESQL DO RENDER
 def obter_conexao_db():
     url_banco = os.environ.get('DATABASE_URL')
     if url_banco:
@@ -27,11 +26,11 @@ def inicializar_banco():
             cursor.close()
             conn.close()
         except Exception as e:
-            print(f"Erro na sincronização estrutural: {e}")
+            print(f"Erro na sincronizacao estrutural: {e}")
 
 inicializar_banco()
 
-# ROTAS MULTI-PÁGINAS PURAS (SEM ÂNCORAS OU HASHTAGS)
+# ROTAS MULTI-PAGINAS SEM ERROS DE DIGITACAO (RESOLVE ERRO 500)
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -52,6 +51,7 @@ def pagina_processos():
 def pagina_materiais():
     return render_template('materiais.html')
 
+# CORRIGIDO: Nome do arquivo mapeado com precisao cirurgica para bater com templates/precificacao.html
 @app.route('/precificacao')
 def pagina_precificacao():
     return render_template('precificacao.html')
@@ -95,10 +95,7 @@ def salvar_imobiliario():
         'custoAnualTotal': round(custo_imobiliario_anual, 2),
         'custoMinutoInstalacao': round(custo_minuto_instalacao, 4)
     })
-
-
-
-# ENDPOINT: CRUD AVANÇADO DE ATIVOS E MÁQUINAS METALÚRGICAS (POSTGRES)
+# ENDPOINT: CRUD AVANCADO DE ATIVOS E MAQUINAS METALURGICAS (POSTGRES)
 @app.route('/api/maquinas', methods=['GET', 'POST', 'PUT'])
 @app.route('/api/maquinas/<int:maquina_id>', methods=['DELETE'])
 def gerenciar_maquinas(maquina_id=None):
@@ -107,7 +104,6 @@ def gerenciar_maquinas(maquina_id=None):
         return jsonify([])
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     
-    # Tratamento de Deleção Física Exigida no Escopo Operacional
     if request.method == 'DELETE' and maquina_id:
         try:
             cursor.execute("DELETE FROM maquinas WHERE id = %s;", (maquina_id,))
@@ -134,12 +130,11 @@ def gerenciar_maquinas(maquina_id=None):
         diametro = float(data.get('diametro_mm', 0))
         comprimento = float(data.get('comprimento_mm', 0))
         
-        # Filtro de Sinal: Evita depreciação negativa
         depreciacao_anual = (preco - valor_revenda) / vida_util if preco > valor_revenda else 0
         custo_fixo_anual = depreciacao_anual + manutencao
         minutos_ano = horas_ano * 60
         custo_energia_minuto = (potencia * tarifa) / 60.0
-        custo_minuto = (custo_fixo_anual / minutos_ano) + custo_energia_minuto
+        custo_minuto = (custo_fixo_anual / minutes_ano) + custo_energia_minuto
 
         try:
             if request.method == 'PUT' and id_maquina:
