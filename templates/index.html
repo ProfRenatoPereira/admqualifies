@@ -8,257 +8,31 @@
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="../static/css/style.css">
 </head>
-<body>
+{% extends 'base.html' %}
 
-    <!-- Links de Acessibilidade Teclado -->
-    <div class="skip-links">
-        <a href="#main-content">Ir para o conteúdo principal</a>
-        <a href="#navMenu">Ir para o menu de navigation</a>
+{% block title %}Apresentação Institucional - TERCEIRO ADM ASSOCIADOS{% endblock %}
+
+{% block content %}
+<section class="card" style="text-align: center; padding: 40px;">
+    <h2>Apresentação Corporativa</h2>
+    <p style="font-size: 1.1rem; max-width: 800px; margin: 20px auto; color: #555;">
+        Desde 2019, a <strong>TERCEIRO ADM ASSOCIADOS</strong> atua como referência em assessoria e auditoria de gerenciamento operacional. Desenvolvemos soluções completas para engenharia de custos industriais, pcp e auditoria contábil-trabalhista para plantas metalúrgicas de alta performance.
+    </p>
+
+    <!-- Arte Vetorial CSS Simbolizando o Prédio Fictício Industrial -->
+    <div class="building-art-container" style="margin: 40px auto; width: 200px; height: 160px; background-color: #bdc3c7; position: relative; border-radius: 4px; border-bottom: 8px solid #2c3e50;">
+        <div style="position: absolute; bottom: 0; left: 20px; width: 40px; height: 120px; background-color: #2c3e50;"></div>
+        <div style="position: absolute; bottom: 0; right: 20px; width: 40px; height: 120px; background-color: #2c3e50;"></div>
+        <div style="position: absolute; top: -30px; left: 60px; width: 80px; height: 30px; background-color: #16a085; border-radius: 4px 4px 0 0;"></div>
+        <div style="position: absolute; top: 15px; left: 30px; width: 20px; height: 20px; background-color: #fff; border-radius: 2px;"></div>
+        <div style="position: absolute; top: 15px; right: 30px; width: 20px; height: 20px; background-color: #fff; border-radius: 2px;"></div>
+        <div style="position: absolute; top: 50px; left: 30px; width: 20px; height: 20px; background-color: #fff; border-radius: 2px;"></div>
+        <div style="position: absolute; top: 50px; right: 30px; width: 20px; height: 20px; background-color: #fff; border-radius: 2px;"></div>
     </div>
 
-    <!-- Barra de Ferramentas de Acessibilidade -->
-    <div class="accessibility-bar" role="toolbar" aria-label="Ferramentas de Acessibilidade">
-        <button onclick="toggleContraste()" aria-label="Alternar Alto Contraste">🌓 Alto Contraste</button>
-        <button onclick="alterarFonte(1)" aria-label="Aumentar tamanho do texto">A+</button>
-        <button onclick="alterarFonte(-1)" aria-label="Diminuir tamanho do texto">A-</button>
+    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; font-size: 0.95rem; color: #777;">
+        <p><strong>Complexo Industrial Fictício:</strong> Avenida das Nações Metalúrgicas, nº 2019 - Distrito Industrial, Paraná</p>
+        <p><strong>Contato Operacional:</strong> contato@terceiroadm.com.br | Tel: (41) 3333-2019</p>
     </div>
-
-    <!-- Header Corporativo com Título e Descrição Institucional -->
-    <header class="navbar-corporate" role="banner">
-        <div class="header-main-row">
-            <div class="logo-container">
-                <img src="../static/images/logo.png" alt="Logo Teradmas Desde 2019" class="brand-logo">
-            </div>
-            <div class="header-text-container">
-                <h1>TERCEIRO ADM ASSOCIADOS</h1>
-                <p>Projetos, Execução, Assessoria, Auditoria e Gerenciamento Operacional e de Custos</p>
-            </div>
-            <button class="menu-toggle" aria-label="Abrir Menu de Navegação" aria-controls="navMenu" aria-expanded="false" id="menuToggle">
-                <span class="bar" aria-hidden="true"></span>
-                <span class="bar" aria-hidden="true"></span>
-                <span class="bar" aria-hidden="true"></span>
-            </button>
-        </div>
-        
-        <nav class="nav-menu-corporate" id="navMenu" aria-label="Menu Principal">
-            <ul class="nav-links">
-                <li class="dropdown">
-                    <button class="dropdown-toggle" aria-expanded="false" aria-haspopup="true">1. Estrutura ▾</button>
-                    <ul class="dropdown-menu">
-                        <li><a href="#terreno">Instalações Imobiliárias</a></li>
-                        <li><a href="#maquinas-painel">Ativos & Máquinas</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <button class="dropdown-toggle" aria-expanded="false" aria-haspopup="true">2. Processos & MOD ▾</button>
-                    <ul class="dropdown-menu">
-                        <li><a href="#roteiro-processos">Roteiro & Tempos</a></li>
-                        <li><a href="#materia-prima">Matéria-Prima</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <button class="dropdown-toggle" aria-expanded="false" aria-haspopup="true">3. Finanças & ROI ▾</button>
-                    <ul class="dropdown-menu">
-                        <li><a href="#tabela-vendas">Mark-up Individual</a></li>
-                        <li><a href="#retorno-acionistas">Retorno Acionistas</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container" id="main-content" tabindex="-1">
-        
-        <!-- Seção 1: Instalações Imobiliárias -->
-        <section id="terreno" class="card" aria-labelledby="tit-terreno">
-            <h2 id="tit-terreno">Precificação de Instalações Imobiliárias</h2>
-            <div class="grid-form">
-                <div class="form-group">
-                    <label for="imoTerreno">Valor de Compra do Terreno (R$):</label>
-                    <input type="number" id="imoTerreno" value="500000">
-                    
-                    <label for="imoEdificacao">Custo de Edificação/Galpão (R$):</label>
-                    <input type="number" id="imoEdificacao" value="750000">
-                    
-                    <label for="imoVidaUtil">Tempo de Amortização (Anos):</label>
-                    <input type="number" id="imoVidaUtil" value="20">
-                </div>
-                <div class="form-group">
-                    <label for="imoImpostos">Impostos Imobiliários Anuais / IPTU (R$):</label>
-                    <input type="number" id="imoImpostos" value="15000">
-                    
-                    <label for="imoHorasAno">Horas Operacionais por Ano:</label>
-                    <input type="number" id="imoHorasAno" value="2400">
-                    
-                    <button onclick="calcularCustosImobiliarios()" class="btn-primary">Calcular Custo Imobiliário</button>
-                </div>
-            </div>
-            <div id="resultadoImobiliario" class="result-box" style="display:none;" role="region" aria-live="polite"></div>
-        </section>
-
-        <!-- Seção 2: Ativos e Máquinas -->
-        <section id="maquinas-painel" class="card" aria-labelledby="tit-maquinas">
-            <h2 id="tit-maquinas">Gestão de Ativos & Minuto-Máquina Metalúrgico</h2>
-            <div class="grid-form">
-                <div class="form-group">
-                    <label for="maquinaNome">Nome / Identificação da Máquina:</label>
-                    <input type="text" id="maquinaNome" placeholder="Ex: Torno CNC Mazak 01">
-
-                    <label for="maquinaPreco">Valor de Aquisição (R$):</label>
-                    <input type="number" id="maquinaPreco" value="280000">
-                    
-                    <label for="maquinaVidaUtil">Vida Útil Estimada (Anos):</label>
-                    <input type="number" id="maquinaVidaUtil" value="12">
-                </div>
-                <div class="form-group">
-                    <label for="maquinaValorRevenda">Valor Residual de Revenda (R$):</label>
-                    <input type="number" id="maquinaValorRevenda" value="50000">
-
-                    <label for="maquinaManutencao">Custo de Manutenção Anual (R$):</label>
-                    <input type="number" id="maquinaManutencao" value="18000">
-                    
-                    <label for="maquinaHorasAno">Horas Operacionais por Ano:</label>
-                    <input type="number" id="maquinaHorasAno" value="2400">
-                    
-                    <button onclick="adicionarMaquinaServidor()" class="btn-primary">Salvar e Registrar Ativo</button>
-                </div>
-            </div>
-
-            <table class="data-table" id="tabelaMaquinas" aria-label="Lista de Ativos Cadastrados">
-                <thead>
-                    <tr>
-                        <th>Equipamento</th>
-                        <th>Depreciação Anual</th>
-                        <th>Custo Fixo / Ano</th>
-                        <th>Custo por Minuto</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div id="resultadoAtivo" class="result-box" style="display:none;" role="region" aria-live="polite"></div>
-        </section>
-        <!-- Seção 3: Roteiro e Processos -->
-        <section id="roteiro-processos" class="card" aria-labelledby="tit-roteiro">
-            <h2 id="tit-roteiro">Engenharia de Processos & Mão de Obra</h2>
-            <div class="grid-form">
-                <div class="form-group">
-                    <label for="procSelecaoMaquina">Selecione a Máquina:</label>
-                    <select id="procSelecaoMaquina"></select>
-
-                    <label for="procTempoOperacao">Tempo de Máquina / Ciclo (Minutos):</label>
-                    <input type="number" id="procTempoOperacao" value="15">
-
-                    <label for="procTempoSetup">Tempo de Set-up (Minutos):</label>
-                    <input type="number" id="procTempoSetup" value="30">
-                </div>
-                
-                <div class="form-group">
-                    <label for="procSalarioMod">Salário Base Mensal do Operador (R$):</label>
-                    <input type="number" id="procSalarioMod" value="3000">
-
-                    <label for="procEncargosPercentual">Encargos Sociais + Benefícios (%):</label>
-                    <input type="number" id="procEncargosPercentual" value="85">
-
-                    <label for="procLoteTamanho">Tamanho do Lote de Produção (Peças):</label>
-                    <input type="number" id="procLoteTamanho" value="100">
-
-                    <button onclick="adicionarEtapaProcesso()" class="btn-primary" style="margin-top: 10px;">Inserir Operação</button>
-                </div>
-            </div>
-
-            <table class="data-table" id="tabelaProcessos">
-                <thead>
-                    <tr>
-                        <th>Equipamento</th>
-                        <th>Ciclo (Min)</th>
-                        <th>Custo Máquina</th>
-                        <th>Set-up Rateado</th>
-                        <th>Custo MOD + Encargos</th>
-                        <th>Total Etapa</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            
-            <div class="total-box" style="background-color: #fef9e7; border-left-color: #f39c12;">
-                <strong>Custo Total de Processo: R$ <span id="totalProcessoCusto">0.00</span></strong>
-            </div>
-        </section>
-
-        <!-- Seção 4: Matérias-Primas -->
-        <section id="materia-prima" class="card" aria-labelledby="tit-materias">
-            <h2 id="tit-materias">Engenharia de Produto: Insumos e Matéria-Prima</h2>
-            <div class="inline-form">
-                <input type="text" id="insumoNome" placeholder="Ex: Tarugo de Aço">
-                <input type="number" id="insumoQtd" placeholder="Qtd">
-                <input type="number" id="insumoCustoUn" placeholder="Custo Un (R$)">
-                <button onclick="adicionarInsumo()" class="btn-primary">+ Inserir Item</button>
-            </div>
-            <table class="data-table" id="tabelaInsumos">
-                <thead>
-                    <tr>
-                        <th>Item / Matéria-Prima</th>
-                        <th>Quantidade</th>
-                        <th>Custo Unitário</th>
-                        <th>Subtotal</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div class="total-box">
-                <strong>Custo Total de Material: R$ <span id="totalMaterialCusto">0.00</span></strong>
-            </div>
-        </section>
-
-        <!-- Seção 5: Simulador de Mark-up Comercial com Canais Diferenciados por Produto -->
-        <section id="tabela-vendas" class="card" aria-labelledby="tit-markup">
-            <h2 id="tit-markup">Simulador de Precificação Customizada por Produto</h2>
-            <p>Determine a estratégia comercial de venda aplicando margens individuais para o canal de Varejo ou Atacado sobre o custo acumulado.</p>
-            <div class="grid-form">
-                <div class="form-group">
-                    <label for="custoTotal">Custo Industrial Acumulado do Item (R$):</label>
-                    <input type="number" id="custoTotal" value="100" readonly>
-                    
-                    <label for="canalPreco">Canal de Distribuição Comercial:</label>
-                    <select id="canalPreco" onchange="ajustarMargemPorCanal()">
-                        <option value="varejo">Varejo (Margem Padrão)</option>
-                        <option value="atacado">Atacado (Volume / Margem Reduzida)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="lucro">Margem de Lucro Desejada para o Item (%):</label>
-                    <input type="number" id="lucro" value="25">
-                    
-                    <label for="impostosInput">Impostos Incidentes na Venda (%):</label>
-                    <input type="number" id="impostosInput" value="18">
-                    
-                    <button onclick="calcularPrecovenda()" class="btn-primary" style="margin-top: 10px;">Aplicar Precificação Comercial</button>
-                </div>
-            </div>
-            <div id="resultado" class="result-box" style="display:none;"></div>
-        </section>
-
-        <!-- Seção 6: Retorno aos Acionistas -->
-        <section id="retorno-acionistas" class="card" aria-labelledby="tit-retorno">
-            <h2 id="tit-retorno">Tempo de Retorno do Capital (Payback & ROI)</h2>
-            <div class="grid-form">
-                <div class="form-group">
-                    <label for="retVendasMensais">Estimativa de Peças Vendidas / Mês:</label>
-                    <input type="number" id="retVendasMensais" value="500">
-                </div>
-                <div class="form-group">
-                    <label for="retDespesasFixas">Outras Despesas Administrativas Fixas / Mês (R$):</label>
-                    <input type="number" id="retDespesasFixas" value="8000">
-                    <button onclick="calcularTempoRetorno()" class="btn-primary">Analisar Retorno Financeiro</button>
-                </div>
-            </div>
-            <div id="resultadoRetorno" class="result-box" style="display:none;" role="region" aria-live="polite"></div>
-        </section>
-    </main>
-
-    <script src="../static/js/main.js"></script>
-</body>
-</html>
+</section>
+{% endblock %}
