@@ -1,5 +1,5 @@
 // ============================================================================
-// VARIABLES GLOBAIS INTEGRADAS (Declaradas estritamente uma unica vez)
+// VARIABLES GLOBAIS ESTÁVEIS (Garantia anti-travamento: declaradas uma única vez)
 // ============================================================================
 let parqueMaquinas = [];
 let listaProcessos = [];
@@ -10,9 +10,9 @@ let totalInvestidoMaquinas = 0;
 let lucroPorPecaGlobal = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializacao do Menu Hamburger
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
+
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', () => {
             const expandido = menuToggle.getAttribute('aria-expanded') === 'true';
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Inicializacao de Dropdowns
     const dropdowns = document.querySelectorAll('.dropdown');
     dropdowns.forEach(dropdown => {
         const btn = dropdown.querySelector('.dropdown-toggle');
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Gatilhos Defensivos de Carregamento para Telas Separadas
+    // MAPEAMENTO OPERACIONAL CONFORME A TELA ATUAL EM EXIBIÇÃO
     if (document.getElementById('tabelaMaquinas')) carregarMaquinasDoServidor();
     if (document.getElementById('procSelecaoMaquina')) atualizarSelectMaquinas();
     if (document.getElementById('tabelaProcessos')) renderizarTabelaProcessos();
@@ -49,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('custoTotal')) carregarEMotorCustoGlobal();
 });
 
-// Acessibilidade Otimizada (WCAG)
 function toggleContraste() { document.body.classList.toggle('alto-contraste'); }
 let tamanhoFonteAtual = 100;
 function alterarFonte(direcao) {
@@ -58,6 +56,7 @@ function alterarFonte(direcao) {
         document.documentElement.style.fontSize = `${tamanhoFonteAtual}%`;
     }
 }
+
 function emitirAudioTexto(texto) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -78,7 +77,7 @@ async function calcularCustosImobiliarios() {
     const horas_operacionais_ano = parseInt(document.getElementById('imoHorasAno').value) || 1;
 
     if (valor_terreno <= 0 || custo_edificacao <= 0) {
-        alert("Preencha os valores imobiliários.");
+        alert("Preencha as variáveis imobiliárias de entrada.");
         return;
     }
 
@@ -92,14 +91,14 @@ async function calcularCustosImobiliarios() {
         const data = await response.json();
         localStorage.setItem('custoMinutoImobiliario', data.custoMinutoInstalacao);
         localStorage.setItem('totalInvestidoEstrutura', (valor_terreno + custo_edificacao).toString());
-        emitirAudioTexto("Custos imobiliários salvos.");
+        emitirAudioTexto("Custos imobiliários gravados.");
     }
 }
 
 
 
 // ============================================================================
-// 3. MÓDULO DE ATIVOS & MÁQUINAS COM EXCLUSÃO E ALTERAÇÃO (PÁGINA: maquinas.html)
+// 3. ATIVOS METALÚRGICOS COM CONEXÃO DIRETA AO BANCO (PÁGINA: maquinas.html)
 // ============================================================================
 async function carregarMaquinasDoServidor() {
     const response = await fetch('/api/maquinas');
@@ -140,7 +139,7 @@ async function adicionarMaquinaServidor() {
     const diametro_mm = elDiam ? parseFloat(elDiam.value) || 0 : 0;
     const comprimento_mm = elComp ? parseFloat(elComp.value) || 0 : 0;
 
-    if (!nome || preco <= 0) { alert("Preencha os dados básicos."); return; }
+    if (!nome || preco <= 0) { alert("Informe os dados básicos do ativo."); return; }
     const metodo = id_maquina ? 'PUT' : 'POST';
 
     const response = await fetch('/api/maquinas', {
@@ -158,7 +157,7 @@ async function adicionarMaquinaServidor() {
         const btnSalvar = document.getElementById('btnSalvarAtivo');
         if (btnSalvar) btnSalvar.innerText = "Salvar e Registrar Ativo";
         carregarMaquinasDoServidor();
-        emitirAudioTexto("Ativo processado.");
+        emitirAudioTexto("Equipamento registrado na base PostgreSQL.");
     }
 }
 
@@ -174,7 +173,7 @@ function renderizarTabelaMaquinas() {
         
         tr.innerHTML = `
             <td><strong>${m.nome_maquina}</strong></td>
-            <td>${m.diametro_trabalho_mm} x ${m.comprimento_trabalho_mm} mm</td>
+            <td>Ø ${m.diametro_trabalho_mm} x ${m.comprimento_trabalho_mm} mm</td>
             <td>${m.potencia_kw} kW</td>
             <td>${dtManutFmt}</td>
             <td>R$ ${parseFloat(m.custo_minuto_maquina).toFixed(4)}</td>
@@ -188,11 +187,11 @@ function renderizarTabelaMaquinas() {
 }
 
 async function deletarAtivoServidor(id) {
-    if (!confirm("Tem certeza que deseja deletar este ativo fisicamente do banco de dados?")) return;
+    if (!confirm("Confirmar exclusão física permanente do registro de ativo no banco?")) return;
     const response = await fetch(`/api/maquinas/${id}`, { method: 'DELETE' });
     if (response.ok) {
         carregarMaquinasDoServidor();
-        emitirAudioTexto("Ativo excluido do banco relacional.");
+        emitirAudioTexto("Ativo removido do banco.");
     }
 }
 
@@ -215,15 +214,12 @@ function carregarAtivoParaEdicao(id) {
     if (document.getElementById('maquinaComprimento')) document.getElementById('maquinaComprimento').value = m.comprimento_trabalho_mm;
 
     const btnSalvar = document.getElementById('btnSalvarAtivo');
-    if (btnSalvar) btnSalvar.innerText = "Salvar Alteracoes no Banco";
+    if (btnSalvar) btnSalvar.innerText = "Salvar Alterações no Banco";
 }
 
 
-
-
-
 // ============================================================================
-// 4. PROCESSOS, MATERIAIS E PRECIFICACAO EM CASCATA PERSISTENTE
+// 4. PROCESSOS, ENGENHARIA DE MATERIAIS COM CACHE E ANÁLISE DE ROI
 // ============================================================================
 async function atualizarSelectMaquinas() {
     const select = document.getElementById('procSelecaoMaquina');
@@ -260,6 +256,7 @@ function adicionarEtapaProcesso() {
     const custoSetupEtapa = tempoSetupRateado * custoMin;
     const custoModEtapa = (tempoOperacao + tempoSetupRateado) * custoModMinuto;
 
+    listaProcessos = JSON.parse(localStorage.getItem('listaProcessos')) || [];
     listaProcessos.push({
         id: Date.now(),
         maquinaNome: maquinaSelecionada.nome_maquina,
@@ -269,14 +266,18 @@ function adicionarEtapaProcesso() {
         custoModTotal: custoModEtapa,
         custoTotalEtapa: custoMaquinaEtapa + custoSetupEtapa + custoModEtapa
     });
+    localStorage.setItem('listaProcessos', JSON.stringify(listaProcessos));
     renderizarTabelaProcessos();
 }
 
 function renderizarTabelaProcessos() {
     const tbody = document.querySelector('#tabelaProcessos tbody');
     if (!tbody) return;
+    
+    listaProcessos = JSON.parse(localStorage.getItem('listaProcessos')) || [];
     tbody.innerHTML = '';
     let total = 0;
+    
     listaProcessos.forEach(p => {
         total += p.custoTotalEtapa;
         const tr = document.createElement('tr');
@@ -288,7 +289,9 @@ function renderizarTabelaProcessos() {
 }
 
 function removerProcesso(id) {
+    listaProcessos = JSON.parse(localStorage.getItem('listaProcessos')) || [];
     listaProcessos = listaProcessos.filter(p => p.id !== id);
+    localStorage.setItem('listaProcessos', JSON.stringify(listaProcessos));
     renderizarTabelaProcessos();
 }
 
@@ -322,7 +325,6 @@ function renderizarTabelaInsumos() {
         tr.innerHTML = `<td>${item.nome}</td><td>${item.qtd}</td><td>R$ ${item.custoUn.toFixed(2)}</td><td>R$ ${item.subtotal.toFixed(2)}</td><td><button onclick="removerInsumo(${item.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; cursor:pointer;">X</button></td>`;
         tbody.appendChild(tr);
     });
-    
     document.getElementById('totalMaterialCusto').innerText = total.toFixed(2);
     localStorage.setItem('custoTotalInsumos', total.toString());
 }
@@ -342,7 +344,13 @@ function carregarEMotorCustoGlobal() {
     const totalInsumos = parseFloat(localStorage.getItem('custoTotalInsumos')) || 0;
     const custoMinutoImobiliario = parseFloat(localStorage.getItem('custoMinutoImobiliario')) || 0;
     
-    let custoIndustrialAcumulado = totalProcessos + totalInsumos;
+    let rotas = JSON.parse(localStorage.getItem('listaProcessos')) || [];
+    let tempoTotalMinutos = 0;
+    rotas.forEach(p => { tempoTotalMinutos += (p.tempoOperacao + p.tempoSetupRateado); });
+
+    const rateioImobiliario = tempoTotalMinutos * custoMinutoImobiliario;
+    let custoIndustrialAcumulado = totalProcessos + totalInsumos + rateioImobiliario;
+    
     if (custoIndustrialAcumulado === 0 && totalInsumos > 0) {
         custoIndustrialAcumulado = totalInsumos;
     }
@@ -377,8 +385,8 @@ function calcularTempoRetorno() {
     const volumeVendasMensal = parseInt(document.getElementById('retVendasMensais').value) || 0;
     const despesasAdministrativas = parseFloat(document.getElementById('retDespesasFixas').value) || 0;
     const investimentoImobiliario = parseFloat(localStorage.getItem('totalInvestidoEstrutura')) || 0;
-    let totalPrecoMaquinas = parqueMaquinas.reduce((acc, curr) => acc + parseFloat(curr.preco_compra || 0), 0);
     
+    let totalPrecoMaquinas = parqueMaquinas.reduce((acc, curr) => acc + parseFloat(curr.preco_compra || 0), 0);
     const investimentoTotalInicial = investimentoImobiliario + totalPrecoMaquinas;
     const lucroPorPecaGlobal = parseFloat(localStorage.getItem('lucroPorPecaGlobal')) || 0;
 
@@ -388,5 +396,5 @@ function calcularTempoRetorno() {
     const box = document.getElementById('resultadoRetorno');
     box.style.display = "block";
     if (lucroLiquidoMensal <= 0) { box.innerHTML = "Lucro insuficiente."; return; }
-    box.innerHTML = `<p>Retorno total em aproximadamente ${(investimentoTotalInicial / lucroLiquidoMensal).toFixed(1)} meses.</p>`;
+    box.innerHTML = `<p>Retorno total em aproximadamente ${(investimentoTotalInicial / lucroLiquidoMensal).toFixed(1)} meses de operação.</p>`;
 }
