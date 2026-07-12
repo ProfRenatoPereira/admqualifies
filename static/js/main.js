@@ -1,4 +1,6 @@
-// VARIABLES GLOBAIS INTEGRADAS (Garantia anti-travamento: declaradas uma única vez)
+// ============================================================================
+// VARIABLES GLOBAIS INTEGRADAS (Declaradas estritamente uma unica vez)
+// ============================================================================
 let parqueMaquinas = [];
 let listaProcessos = [];
 let listaInsumos = [];
@@ -8,9 +10,9 @@ let totalInvestidoMaquinas = 0;
 let lucroPorPecaGlobal = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializacao do Menu Hamburger
     const menuToggle = document.getElementById('menuToggle');
     const navMenu = document.getElementById('navMenu');
-
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', () => {
             const expandido = menuToggle.getAttribute('aria-expanded') === 'true';
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Inicializacao de Dropdowns
     const dropdowns = document.querySelectorAll('.dropdown');
     dropdowns.forEach(dropdown => {
         const btn = dropdown.querySelector('.dropdown-toggle');
@@ -38,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // SISTEMA DE ESCUTA DEFENSIVA DE COMPONENTES ATIVOS NA TELA ATUAL
+    // Gatilhos Defensivos de Carregamento para Telas Separadas
     if (document.getElementById('tabelaMaquinas')) carregarMaquinasDoServidor();
     if (document.getElementById('procSelecaoMaquina')) atualizarSelectMaquinas();
     if (document.getElementById('tabelaProcessos')) renderizarTabelaProcessos();
@@ -46,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('custoTotal')) carregarEMotorCustoGlobal();
 });
 
+// Acessibilidade Otimizada (WCAG)
 function toggleContraste() { document.body.classList.toggle('alto-contraste'); }
 let tamanhoFonteAtual = 100;
 function alterarFonte(direcao) {
@@ -54,7 +58,6 @@ function alterarFonte(direcao) {
         document.documentElement.style.fontSize = `${tamanhoFonteAtual}%`;
     }
 }
-
 function emitirAudioTexto(texto) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -75,7 +78,7 @@ async function calcularCustosImobiliarios() {
     const horas_operacionais_ano = parseInt(document.getElementById('imoHorasAno').value) || 1;
 
     if (valor_terreno <= 0 || custo_edificacao <= 0) {
-        alert("Preencha os campos.");
+        alert("Preencha os valores imobiliários.");
         return;
     }
 
@@ -89,7 +92,7 @@ async function calcularCustosImobiliarios() {
         const data = await response.json();
         localStorage.setItem('custoMinutoImobiliario', data.custoMinutoInstalacao);
         localStorage.setItem('totalInvestidoEstrutura', (valor_terreno + custo_edificacao).toString());
-        emitirAudioTexto("Demonstrativo imobiliário processado.");
+        emitirAudioTexto("Custos imobiliários salvos.");
     }
 }
 
@@ -166,8 +169,8 @@ function renderizarTabelaMaquinas() {
     
     parqueMaquinas.forEach(m => {
         const tr = document.createElement('tr');
-        // Formata as datas vindas do padrão SQL
         const dtManutFmt = m.data_manutencao_preventiva ? m.data_manutencao_preventiva.split('T')[0] : 'N/A';
+        const custoAnualExibir = m.custo_manutencao_anual || m.custoFixoAnual || 0;
         
         tr.innerHTML = `
             <td><strong>${m.nome_maquina}</strong></td>
@@ -189,7 +192,7 @@ async function deletarAtivoServidor(id) {
     const response = await fetch(`/api/maquinas/${id}`, { method: 'DELETE' });
     if (response.ok) {
         carregarMaquinasDoServidor();
-        emitirAudioTexto("Ativo excluído do banco relacional.");
+        emitirAudioTexto("Ativo excluido do banco relacional.");
     }
 }
 
@@ -212,14 +215,15 @@ function carregarAtivoParaEdicao(id) {
     if (document.getElementById('maquinaComprimento')) document.getElementById('maquinaComprimento').value = m.comprimento_trabalho_mm;
 
     const btnSalvar = document.getElementById('btnSalvarAtivo');
-    if (btnSalvar) btnSalvar.innerText = "Salvar Alterações no Banco";
+    if (btnSalvar) btnSalvar.innerText = "Salvar Alteracoes no Banco";
 }
 
 
 
 
+
 // ============================================================================
-// 4. PROCESSOS, MATERIAIS E PRECIFICACAO EM CASCATA
+// 4. PROCESSOS, MATERIAIS E PRECIFICACAO EM CASCATA PERSISTENTE
 // ============================================================================
 async function atualizarSelectMaquinas() {
     const select = document.getElementById('procSelecaoMaquina');
@@ -294,28 +298,39 @@ function adicionarInsumo() {
     const custoUn = parseFloat(document.getElementById('insumoCustoUn').value) || 0;
     if (!nome || qtd <= 0 || custoUn <= 0) return;
 
+    listaInsumos = JSON.parse(localStorage.getItem('listaInsumos')) || [];
     listaInsumos.push({ id: Date.now(), nome, qtd, custoUn, subtotal: qtd * custoUn });
     localStorage.setItem('listaInsumos', JSON.stringify(listaInsumos));
     renderizarTabelaInsumos();
+    
+    document.getElementById('insumoNome').value = '';
+    document.getElementById('insumoQtd').value = '';
+    document.getElementById('insumoCustoUn').value = '';
 }
 
 function renderizarTabelaInsumos() {
     const tbody = document.querySelector('#tabelaInsumos tbody');
     if (!tbody) return;
+    
+    listaInsumos = JSON.parse(localStorage.getItem('listaInsumos')) || [];
     tbody.innerHTML = '';
     let total = 0;
+    
     listaInsumos.forEach(item => {
         total += item.subtotal;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${item.nome}</td><td>${item.qtd}</td><td>R$ ${item.custoUn.toFixed(2)}</td><td>R$ ${item.subtotal.toFixed(2)}</td><td><button onclick="removerInsumo(${item.id})">X</button></td>`;
+        tr.innerHTML = `<td>${item.nome}</td><td>${item.qtd}</td><td>R$ ${item.custoUn.toFixed(2)}</td><td>R$ ${item.subtotal.toFixed(2)}</td><td><button onclick="removerInsumo(${item.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; cursor:pointer;">X</button></td>`;
         tbody.appendChild(tr);
     });
+    
     document.getElementById('totalMaterialCusto').innerText = total.toFixed(2);
     localStorage.setItem('custoTotalInsumos', total.toString());
 }
 
 function removerInsumo(id) {
+    listaInsumos = JSON.parse(localStorage.getItem('listaInsumos')) || [];
     listaInsumos = listaInsumos.filter(i => i.id !== id);
+    localStorage.setItem('listaInsumos', JSON.stringify(listaInsumos));
     renderizarTabelaInsumos();
 }
 
@@ -328,9 +343,8 @@ function carregarEMotorCustoGlobal() {
     const custoMinutoImobiliario = parseFloat(localStorage.getItem('custoMinutoImobiliario')) || 0;
     
     let custoIndustrialAcumulado = totalProcessos + totalInsumos;
-    if (custoIndustrialAcumulado === 0) {
-        const totalMaterialTexto = document.getElementById('totalMaterialCusto');
-        if (totalMaterialTexto) custoIndustrialAcumulado = parseFloat(totalMaterialTexto.innerText) || 0;
+    if (custoIndustrialAcumulado === 0 && totalInsumos > 0) {
+        custoIndustrialAcumulado = totalInsumos;
     }
     campoCustoTotalInput.value = custoIndustrialAcumulado.toFixed(2);
 }
