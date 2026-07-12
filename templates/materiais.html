@@ -1,31 +1,34 @@
 {% extends 'base.html' %}
 
-{% block title %}Matéria-Prima e Insumos - Teradmas{% endblock %}
+{% block title %}Engenharia de Materiais - TERCEIRO ADM ASSOCIADOS{% endblock %}
 
 {% block content %}
 <section class="card" aria-labelledby="tit-materias">
-    <h2 id="tit-materias">Engenharia de Produto: Insumos e Matéria-Prima</h2>
-    <p>Adicione os materiais utilizados no produto para compor a folha de custos.</p>
+    <h2 id="tit-materias">Estrutura de Produto (BOM) & Matéria-Prima</h2>
+    <p>Adicione tarugos, componentes, consumíveis e insumos diversos associados à fabricação unitária do item.</p>
+    
     <div class="inline-form">
-        <input type="text" id="insumoNome" placeholder="Ex: Tarugo de Aço SAE 1045" style="padding: 12px; border: 2px solid #555; border-radius: 4px; font-size: 1.1rem;">
-        <input type="number" id="insumoQtd" placeholder="Qtd" style="padding: 12px; border: 2px solid #555; border-radius: 4px; font-size: 1.1rem;">
-        <input type="number" id="insumoCustoUn" placeholder="Custo Un (R$)" style="padding: 12px; border: 2px solid #555; border-radius: 4px; font-size: 1.1rem;">
-        <button onclick="adicionarInsumo()" class="btn-primary">+ Inserir Item</button>
+        <input type="text" id="insumoNome" placeholder="Descrição do Material (Ex: Aço SAE 1045)">
+        <input type="number" id="insumoQtd" placeholder="Quantidade">
+        <input type="number" id="insumoCustoUn" placeholder="Custo Unitário (R$)">
+        <button onclick="adicionarInsumo()" class="btn-primary">+ Adicionar Insumo</button>
     </div>
+
     <table class="data-table" id="tabelaInsumos">
         <thead>
             <tr>
-                <th>Item / Matéria-Prima</th>
-                <th>Quantidade</th>
+                <th>Componente / Insumo</th>
+                <th>Quantidade Utilizada</th>
                 <th>Custo Unitário</th>
-                <th>Subtotal</th>
-                <th>Ação</th>
+                <th>Subtotal do Item</th>
+                <th>Remover</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
+    
     <div class="total-box">
-        <strong>Custo Total de Material: R$ <span id="totalMaterialCusto">0.00</span></strong>
+        <strong>Custo Acumulado de Materiais: R$ <span id="totalMaterialCusto">0.00</span></strong>
     </div>
 </section>
 {% endblock %}
