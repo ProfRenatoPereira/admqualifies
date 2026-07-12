@@ -1,30 +1,31 @@
 {% extends 'base.html' %}
 
-{% block title %}Simulador de Preços - Teradmas{% endblock %}
+{% block title %}Formação de Preço de Venda - TERCEIRO ADM ASSOCIADOS{% endblock %}
 
 {% block content %}
 <section class="card" aria-labelledby="tit-markup">
-    <h2 id="tit-markup">Simulador de Precificação Customizada por Produto</h2>
-    <p>Aplique as margens de lucro individualizadas escolhendo o canal de distribuição para o cálculo do preço de venda corporativo.</p>
+    <h2 id="tit-markup">Formação Estratégica de Preço por Canais</h2>
+    <p>Simule e aplique margens corporativas individualizadas para Atacado ou Varejo sobre o custo industrial acumulado.</p>
+    
     <div class="grid-form">
         <div class="form-group">
             <label for="custoTotal">Custo Industrial Acumulado do Item (R$):</label>
-            <input type="number" id="custoTotal" value="100" readonly style="background-color: #eee;">
+            <input type="number" id="custoTotal" value="0.00" readonly style="background-color: #f1f2f6; font-weight: bold; border-color: #a4b0be;">
             
             <label for="canalPreco">Canal de Distribuição Comercial:</label>
             <select id="canalPreco" onchange="ajustarMargemPorCanal()">
-                <option value="varejo">Varejo (Margem Padrão)</option>
-                <option value="atacado">Atacado (Volume / Margem Reduzida)</option>
+                <option value="varejo">Varejo (Margem de Contribuição Plena)</option>
+                <option value="atacado">Atacado (Margem Reduzida por Volume)</option>
             </select>
         </div>
         <div class="form-group">
-            <label for="lucro">Margem de Lucro Desejada para o Item (%):</label>
+            <label for="lucro">Margem de Lucro Almejada (%):</label>
             <input type="number" id="lucro" value="25">
             
-            <label for="impostosInput">Impostos Incidentes na Venda (%):</label>
+            <label for="impostosInput">Impostos sobre a Venda Faturamento (%):</label>
             <input type="number" id="impostosInput" value="18">
             
-            <button onclick="calcularPrecovenda()" class="btn-primary" style="margin-top: 10px;">Aplicar Precificação Comercial</button>
+            <button onclick="calcularPrecovenda()" class="btn-primary" style="margin-top: 10px;">Processar Mark-up e Preço Final</button>
         </div>
     </div>
     <div id="resultado" class="result-box" style="display:none;"></div>
