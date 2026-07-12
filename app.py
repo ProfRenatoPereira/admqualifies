@@ -30,7 +30,7 @@ def inicializar_banco():
 
 inicializar_banco()
 
-# ROTAS MULTI-PAGINAS SEM ERROS DE DIGITACAO (RESOLVE ERRO 500)
+# ROTAS MULTI-PAGINAS (NOMENCLATURAS TRAVADAS EM MINUSCULO SEM ACENTO)
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -51,7 +51,7 @@ def pagina_processos():
 def pagina_materiais():
     return render_template('materiais.html')
 
-# CORRIGIDO: Nome do arquivo mapeado com precisao cirurgica para bater com templates/precificacao.html
+# CORRECAO ABSOLUTA: Forçado o nome exato do arquivo físico (templates/precificacao.html)
 @app.route('/precificacao')
 def pagina_precificacao():
     return render_template('precificacao.html')
@@ -95,7 +95,7 @@ def salvar_imobiliario():
         'custoAnualTotal': round(custo_imobiliario_anual, 2),
         'custoMinutoInstalacao': round(custo_minuto_instalacao, 4)
     })
-# ENDPOINT: CRUD AVANCADO DE ATIVOS E MAQUINAS METALURGICAS (POSTGRES)
+# ENDPOINT: CRUD DE ATIVOS E MAQUINAS METALURGICAS (POSTGRES)
 @app.route('/api/maquinas', methods=['GET', 'POST', 'PUT'])
 @app.route('/api/maquinas/<int:maquina_id>', methods=['DELETE'])
 def gerenciar_maquinas(maquina_id=None):
@@ -134,7 +134,7 @@ def gerenciar_maquinas(maquina_id=None):
         custo_fixo_anual = depreciacao_anual + manutencao
         minutos_ano = horas_ano * 60
         custo_energia_minuto = (potencia * tarifa) / 60.0
-        custo_minuto = (custo_fixo_anual / minutes_ano) + custo_energia_minuto
+        custo_minuto = (custo_fixo_anual / minutos_ano) + custo_energia_minuto
 
         try:
             if request.method == 'PUT' and id_maquina:
@@ -167,6 +167,7 @@ def gerenciar_maquinas(maquina_id=None):
     conn.close()
     return jsonify(maquinas)
 
+# ENDPOINT: SIMULADOR DE MARK-UP COMERCIAL (PRECIFICACAO GLOBAL)
 @app.route('/api/calculo-markup', methods=['POST'])
 def calcular_markup():
     data = request.get_json()
@@ -178,16 +179,20 @@ def calcular_markup():
         return jsonify({'error': 'Erro de margem'}), 400
     return jsonify({'markup': round(1/denominador, 2), 'preco_venda': round(custo_total * (1/denominador), 2)})
 
+# ENDPOINT: CONSOLE DE BUSCA PARA O QUADRO DE RH (DEFENSIVO CONTRA TABELA AUSENTE)
 @app.route('/api/funcionarios', methods=['GET'])
 def listar_funcionarios_rh():
     conn = obter_conexao_db()
     if not conn: return jsonify([])
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT * FROM funcionarios ORDER BY id DESC;")
-    res = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return jsonify(res)
+    try:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT * FROM funcionarios ORDER BY id DESC;")
+        res = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(res)
+    except Exception:
+        return jsonify([])
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
