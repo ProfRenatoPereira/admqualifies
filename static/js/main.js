@@ -41,24 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. MOTOR DE ROUTING INTERNO: Ativa apenas os códigos da página em exibição
-    const path = window.location.pathname;
-    
-    if (path.includes('/maquinas') && document.getElementById('tabelaMaquinas')) {
-        carregarMaquinasDoServidor();
-    }
-    if (path.includes('/processos')) {
-        carregarProcessosEAtivosFábrica();
-    }
-    if (path.includes('/materiais') && document.getElementById('tabelaInsumos')) {
-        renderizarTabelaInsumos();
-    }
-    if (path.includes('/precificacao') && document.getElementById('custoTotal')) {
-        carregarEMotorCustoGlobal();
-    }
+    // 3. IDENTIFICADOR DE PÁGINAS: Executa as funções apenas se a tabela ou select existir na tela
+    if (document.getElementById('tabelaMaquinas')) carregarMaquinasDoServidor();
+    if (document.getElementById('procSelecaoMaquina')) carregarProcessosEAtivosFabrica();
+    if (document.getElementById('tabelaInsumos')) renderizarTabelaInsumos();
+    if (document.getElementById('custoTotal')) carregarEMotorCustoGlobal();
 });
 
-// Acessibilidade Visuo-Auditiva (Diretrizes WCAG / eMAG)
+// Acessibilidade Visuo-Auditiva
 function toggleContraste() { document.body.classList.toggle('alto-contraste'); }
 let tamanhoFonteAtual = 100;
 function alterarFonte(direcao) {
@@ -75,6 +65,8 @@ function emitirAudioTexto(texto) {
         window.speechSynthesis.speak(mensagem);
     }
 }
+
+
 
 
 // ============================================================================
@@ -104,7 +96,7 @@ async function calcularCustosImobiliarios() {
         localStorage.setItem('totalInvestidoEstrutura', (valor_terreno + custo_edificacao).toString());
         
         const box = document.getElementById('resultadoImobiliario');
-        if(box) {
+        if (box) {
             box.style.display = 'block';
             box.innerHTML = `<p>Custo da Instalação fixado em R$ ${data.custoMinutoInstalacao.toFixed(4)} por minuto.</p>`;
         }
@@ -126,19 +118,35 @@ async function carregarMaquinasDoServidor() {
 }
 
 async function adicionarMaquinaServidor() {
-    const id_maquina = document.getElementById('maquinaIdOculto').value;
-    const nome = document.getElementById('maquinaNome').value.trim();
-    const preco = parseFloat(document.getElementById('maquinaPreco').value) || 0;
-    const vidaUtil = parseInt(document.getElementById('maquinaVidaUtil').value) || 1;
-    const valorRevenda = parseFloat(document.getElementById('maquinaValorRevenda').value) || 0;
-    const manutencao = parseFloat(document.getElementById('maquinaManutencao').value) || 0;
-    const horasAno = parseInt(document.getElementById('maquinaHorasAno').value) || 1;
-    const potencia_kw = parseFloat(document.getElementById('maquinaPotencia').value) || 0;
-    const tarifa_kwh = parseFloat(document.getElementById('maquinaTarifa').value) || 0;
-    const data_aquisicao = document.getElementById('maquinaAquisicao').value;
-    const data_manutencao = document.getElementById('maquinaPrev').value;
-    const diametro_mm = parseFloat(document.getElementById('maquinaDiametro').value) || 0;
-    const comprimento_mm = parseFloat(document.getElementById('maquinaComprimento').value) || 0;
+    const elId = document.getElementById('maquinaIdOculto');
+    const elNome = document.getElementById('maquinaNome');
+    const elPreco = document.getElementById('maquinaPreco');
+    const elVidaUtil = document.getElementById('maquinaVidaUtil');
+    const elValorRevenda = document.getElementById('maquinaValorRevenda');
+    const elManutencao = document.getElementById('maquinaManutencao');
+    const elHorasAno = document.getElementById('maquinaHorasAno');
+    const elPotencia = document.getElementById('maquinaPotencia');
+    const elTarifa = document.getElementById('maquinaTarifa');
+    const elAq = document.getElementById('maquinaAquisicao');
+    const elPrev = document.getElementById('maquinaPrev');
+    const elDiam = document.getElementById('maquinaDiametro');
+    const elComp = document.getElementById('maquinaComprimento');
+
+    if (!elNome || !elPreco) return;
+
+    const id_maquina = elId ? elId.value : '';
+    const nome = elNome.value.trim();
+    const preco = parseFloat(elPreco.value) || 0;
+    const vidaUtil = elVidaUtil ? parseInt(elVidaUtil.value) || 1 : 1;
+    const valorRevenda = elValorRevenda ? parseFloat(elValorRevenda.value) || 0 : 0;
+    const manutencao = elManutencao ? parseFloat(elManutencao.value) || 0 : 0;
+    const horasAno = elHorasAno ? parseInt(elHorasAno.value) || 1 : 1;
+    const potencia_kw = elPotencia ? parseFloat(elPotencia.value) || 0 : 0;
+    const tarifa_kwh = elTarifa ? parseFloat(elTarifa.value) || 0 : 0;
+    const data_aquisicao = elAq ? elAq.value : '';
+    const data_manutencao = elPrev ? elPrev.value : '';
+    const diametro_mm = elDiam ? parseFloat(elDiam.value) || 0 : 0;
+    const comprimento_mm = elComp ? parseFloat(elComp.value) || 0 : 0;
 
     if (!nome || preco <= 0) { alert("Preencha o nome e preço do ativo."); return; }
     const metodo = id_maquina ? 'PUT' : 'POST';
@@ -147,16 +155,19 @@ async function adicionarMaquinaServidor() {
         method: metodo,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            id: id_maquina, nome, preco, vida_util: vidaUtil, valor_revenda: valorRevenda, 
-            manutencao, horas_ano: horasAno, potencia_kw, tarifa_kwh,
-            data_aquisicao, data_manutencao, diametro_mm, comprimento_mm
+            id: id_maquina, nome: nome, preco: preco, vida_util: vidaUtil, 
+            valor_revenda: valorRevenda, manutencao: manutencao, horas_ano: horasAno, 
+            potencia_kw: potencia_kw, tarifa_kwh: tarifa_kwh,
+            data_aquisicao: data_aquisicao, data_manutencao: data_manutencao, 
+            diametro_mm: diametro_mm, comprimento_mm: comprimento_mm
         })
     });
 
     if (response.ok) {
-        document.getElementById('maquinaIdOculto').value = '';
-        document.getElementById('maquinaNome').value = '';
-        document.getElementById('btnSalvarAtivo').innerText = "Salvar e Registrar Ativo";
+        if(elId) elId.value = '';
+        if(elNome) elNome.value = '';
+        const btnSalvar = document.getElementById('btnSalvarAtivo');
+        if (btnSalvar) btnSalvar.innerText = "Salvar e Registrar Ativo";
         carregarMaquinasDoServidor();
         emitirAudioTexto("Equipamento gravado no banco de dados.");
     }
@@ -170,14 +181,17 @@ function renderizarTabelaMaquinas() {
     parqueMaquinas.forEach(m => {
         const tr = document.createElement('tr');
         const dtFmt = m.data_manutencao_preventiva ? m.data_manutencao_preventiva.substring(0,10) : 'N/A';
-        const custoAnual = m.custo_manutencao_anual || 0;
+        // CORRIGIDO: Chaves mapeadas com precisao para casar com o RealDictCursor do Python
+        const diam = m.diametro_trabalho_mm || 0;
+        const comp = m.comprimento_trabalho_mm || 0;
+        const custoMin = m.custo_minuto_maquina || 0;
         
         tr.innerHTML = `
             <td><strong>${m.nome_maquina}</strong></td>
-            <td>Ø ${m.diametro_trabalho_mm} x ${m.comprimento_trabalho_mm} mm</td>
+            <td>Ø ${diam} x ${comp} mm</td>
             <td>${m.potencia_kw} kW</td>
             <td>${dtFmt}</td>
-            <td>R$ ${parseFloat(m.custo_minuto_maquina).toFixed(4)}</td>
+            <td>R$ ${parseFloat(custoMin).toFixed(4)}</td>
             <td>
                 <button onclick="carregarAtivoParaEdicao(${m.id})" style="background:#3498db; color:white; border:none; padding:4px 8px; cursor:pointer; margin-right:5px;">Alterar</button>
                 <button onclick="deletarAtivoServidor(${m.id})" style="background:#e74c3c; color:white; border:none; padding:4px 8px; cursor:pointer;">Deletar</button>
@@ -186,6 +200,8 @@ function renderizarTabelaMaquinas() {
         tbody.appendChild(tr);
     });
 }
+
+
 
 async function deletarAtivoServidor(id) {
     if (!confirm("Deseja excluir este equipamento permanentemente do PostgreSQL?")) return;
@@ -200,30 +216,28 @@ function carregarAtivoParaEdicao(id) {
     const m = parqueMaquinas.find(item => item.id === id);
     if (!m) return;
 
-    document.getElementById('maquinaIdOculto').value = m.id;
-    document.getElementById('maquinaNome').value = m.nome_maquina;
-    document.getElementById('maquinaPreco').value = m.preco_compra;
-    document.getElementById('maquinaVidaUtil').value = m.tempo_vida_util_anos;
-    document.getElementById('maquinaValorRevenda').value = m.valor_revenda_estimado;
-    document.getElementById('maquinaManutencao').value = m.custo_manutencao_anual;
-    document.getElementById('maquinaHorasAno').value = m.horas_ativas_ano;
-    document.getElementById('maquinaPotencia').value = m.potencia_kw;
-    document.getElementById('maquinaTarifa').value = m.tarifa_kwh;
-    if(m.data_aquisicao) document.getElementById('maquinaAquisicao').value = m.data_aquisicao.substring(0,10);
-    if(m.data_manutencao_preventiva) document.getElementById('maquinaPrev').value = m.data_manutencao_preventiva.substring(0,10);
-    document.getElementById('maquinaDiametro').value = m.diametro_trabalho_mm;
-    document.getElementById('maquinaComprimento').value = m.comprimento_trabalho_mm;
+    if(document.getElementById('maquinaIdOculto')) document.getElementById('maquinaIdOculto').value = m.id;
+    if(document.getElementById('maquinaNome')) document.getElementById('maquinaNome').value = m.nome_maquina;
+    if(document.getElementById('maquinaPreco')) document.getElementById('maquinaPreco').value = m.preco_compra;
+    if(document.getElementById('maquinaVidaUtil')) document.getElementById('maquinaVidaUtil').value = m.tempo_vida_util_anos;
+    if(document.getElementById('maquinaValorRevenda')) document.getElementById('maquinaValorRevenda').value = m.valor_revenda_estimado;
+    if(document.getElementById('maquinaManutencao')) document.getElementById('maquinaManutencao').value = m.custo_manutencao_anual;
+    if(document.getElementById('maquinaHorasAno')) document.getElementById('maquinaHorasAno').value = m.horas_ativas_ano;
+    if(document.getElementById('maquinaPotencia')) document.getElementById('maquinaPotencia').value = m.potencia_kw;
+    if(document.getElementById('maquinaTarifa')) document.getElementById('maquinaTarifa').value = m.tarifa_kwh;
+    if(m.data_aquisicao && document.getElementById('maquinaAquisicao')) document.getElementById('maquinaAquisicao').value = m.data_aquisicao.substring(0,10);
+    if(m.data_manutencao_preventiva && document.getElementById('maquinaPrev')) document.getElementById('maquinaPrev').value = m.data_manutencao_preventiva.substring(0,10);
+    if(document.getElementById('maquinaDiametro')) document.getElementById('maquinaDiametro').value = m.diametro_trabalho_mm;
+    if(document.getElementById('maquinaComprimento')) document.getElementById('maquinaComprimento').value = m.comprimento_trabalho_mm;
 
-    document.getElementById('btnSalvarAtivo').innerText = "Salvar Alterações no Banco";
+    const btnSalvar = document.getElementById('btnSalvarAtivo');
+    if (btnSalvar) btnSalvar.innerText = "Salvar Alterações no Banco";
 }
-
-
 
 // ============================================================================
 // 4. MÓDULO DE PROCESSOS, PCP E ROTEIROS (PÁGINA: processos.html)
 // ============================================================================
-async function carregarProcessosEAtivosFábrica() {
-    // 1. Busca as máquinas direto do banco de dados vivo para popular o select
+async function carregarProcessosEAtivosFabrica() {
     const select = document.getElementById('procSelecaoMaquina');
     if (!select) return;
     
@@ -240,9 +254,7 @@ async function carregarProcessosEAtivosFábrica() {
             select.appendChild(option);
         });
     }
-    
-    // 2. Renderiza a tabela de processos salvos na sessão atual
-    renderizarTabelaProcessos();
+    renderuzarTabelaProcessos();
 }
 
 function adicionarEtapaProcesso() {
@@ -277,10 +289,13 @@ function adicionarEtapaProcesso() {
     });
     
     localStorage.setItem('listaProcessos', JSON.stringify(listaProcessos));
-    renderizarTabelaProcessos();
+    renderuzarTabelaProcessos();
 }
 
-function renderizarTabelaProcessos() {
+
+
+
+function renderuzarTabelaProcessos() {
     const tbody = document.querySelector('#tabelaProcessos tbody');
     if (!tbody) return;
     
@@ -303,7 +318,7 @@ function renderizarTabelaProcessos() {
         tbody.appendChild(tr);
     });
     
-    document.getElementById('totalProcessoCusto').innerText = total.toFixed(2);
+    if(document.getElementById('totalProcessoCusto')) document.getElementById('totalProcessoCusto').innerText = total.toFixed(2);
     localStorage.setItem('custoTotalProcessos', total.toString());
 }
 
@@ -311,16 +326,9 @@ function removerProcesso(id) {
     listaProcessos = JSON.parse(localStorage.getItem('listaProcessos')) || [];
     listaProcessos = listaProcessos.filter(p => p.id !== id);
     localStorage.setItem('listaProcessos', JSON.stringify(listaProcessos));
-    renderizarTabelaProcessos();
+    renderuzarTabelaProcessos();
 }
 
-
-
-
-
-// ============================================================================
-// 5. MATERIAIS, FORMULAÇÃO DE CANAIS E PAYBACK (PÁGINAS SEPARADAS)
-// ============================================================================
 function adicionarInsumo() {
     const nome = document.getElementById('insumoNome').value.trim();
     const qtd = parseFloat(document.getElementById('insumoQtd').value) || 0;
@@ -408,19 +416,12 @@ async function calcularPrecovenda() {
     }
 }
 
-async function calcularTempoRetorno() {
+function calcularTempoRetorno() {
     const volumeVendasMensal = parseInt(document.getElementById('retVendasMensais').value) || 0;
     const despesasAdministrativas = parseFloat(document.getElementById('retDespesasFixas').value) || 0;
     const investimentoImobiliario = parseFloat(localStorage.getItem('totalInvestidoEstrutura')) || 0;
     
-    // Busca do banco de dados para computar o ROI de ativos fixos reais
-    const response = await fetch('/api/maquinas');
-    let totalPrecoMaquinas = 0;
-    if (response.ok) {
-        const maqBanco = await response.json();
-        totalPrecoMaquinas = maqBanco.reduce((acc, curr) => acc + parseFloat(curr.preco_compra || 0), 0);
-    }
-    
+    let totalPrecoMaquinas = parqueMaquinas.reduce((acc, curr) => acc + parseFloat(curr.preco_compra || 0), 0);
     const investimentoTotalInicial = investimentoImobiliario + totalPrecoMaquinas;
     const lucroPorPecaGlobal = parseFloat(localStorage.getItem('lucroPorPecaGlobal')) || 0;
 
@@ -428,13 +429,9 @@ async function calcularTempoRetorno() {
     if (!box) return;
     box.style.display = "block";
 
-    if (investimentoTotalInicial <= 0 || lucroPorPecaGlobal <= 0) {
-        box.innerHTML = "<span style='color:red;'>Erro: Cadastre instalações, ativos e faça a precificação do produto antes.</span>";
-        return;
-    }
-
+    if (investimentoTotalInicial <= 0 || lucroPorPecaGlobal <= 0) return;
     const lucroLiquidoMensal = (volumeVendasMensal * lucroPorPecaGlobal) - despesasAdministrativas;
-    if (lucroLiquidoMensal <= 0) { box.innerHTML = "<span style='color:red;'>Lucro insuficiente para pagar a estrutura.</span>"; return; }
     
-    box.innerHTML = `<p>O investimento inicial totalizado de R$ ${investimentoTotalInicial.toFixed(2)} retornará em aproximadamente <strong>${(investimentoTotalInicial / lucroLiquidoMensal).toFixed(1)} meses</strong>.</p>`;
+    if (lucroLiquidoMensal <= 0) { box.innerHTML = "Lucro insuficiente."; return; }
+    box.innerHTML = `<p>Retorno total em aproximadamente ${(investimentoTotalInicial / lucroLiquidoMensal).toFixed(1)} meses de operação.</p>`;
 }
