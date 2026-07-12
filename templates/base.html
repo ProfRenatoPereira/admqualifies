@@ -11,7 +11,7 @@
 
     <div class="skip-links"><a href="#main-content">Ir para o conteúdo principal</a></div>
 
-    <!-- Barra de Ferramentas de Acessibilidade -->
+    <!-- Ferramentas Visuais e Auditivas de Acessibilidade -->
     <div class="accessibility-bar" role="toolbar" aria-label="Ferramentas de Acessibilidade">
         <button onclick="toggleContraste()" aria-label="Alternar Alto Contraste">🌓 Alto Contraste</button>
         <button onclick="alterarFonte(1)" aria-label="Aumentar tamanho do texto">A+</button>
@@ -28,7 +28,7 @@
                 <h1>TERCEIRO ADM ASSOCIADOS</h1>
                 <p>Projetos, Execução, Assessoria, Auditoria e Gerenciamento Operacional e de Custos</p>
             </div>
-            <button class="menu-toggle" aria-label="Abrir Menu de Navegação" aria-controls="navMenu" aria-expanded="false" id="menuToggle">
+            <button class="menu-toggle" aria-label="Abrir Menu" aria-controls="navMenu" aria-expanded="false" id="menuToggle">
                 <span class="bar" aria-hidden="true"></span>
                 <span class="bar" aria-hidden="true"></span>
                 <span class="bar" aria-hidden="true"></span>
@@ -63,6 +63,7 @@
         </nav>
     </header>
 
+    <!-- Conteúdo Dinâmico das Páginas Filhas -->
     <main class="container" id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
