@@ -65,7 +65,7 @@ function emitirAudioTexto(texto) {
 
 
 // ============================================================================
-// 2. MÓDULO IMOBILIÁRIO & ATIVOS COM ENERGIA ELÉTRICA (VERSÃO BLINDADA)
+// 2. MÓDULO IMOBILIÁRIO & ATIVOS COM ENERGIA ELÉTRICA (VERSÃO CORRIGIDA E BLINDADA)
 // ============================================================================
 async function calcularCustosImobiliarios() {
     const valor_terreno = parseFloat(document.getElementById('imoTerreno').value) || 0;
@@ -102,7 +102,6 @@ async function carregarMaquinasDoServidor() {
 }
 
 async function adicionarMaquinaServidor() {
-    // Validação anti-quebra: Captura os elementos caso existam na página atual, senão atribui null
     const elId = document.getElementById('maquinaIdOculto');
     const elNome = document.getElementById('maquinaNome');
     const elPreco = document.getElementById('maquinaPreco');
@@ -113,7 +112,7 @@ async function adicionarMaquinaServidor() {
     const elPotencia = document.getElementById('maquinaPotencia');
     const elTarifa = document.getElementById('maquinaTarifa');
 
-    // Se os campos base não existirem nesta tela, cancela a operação silenciosamente para não travar o ERP
+    // Se os campos base não existirem nesta tela, cancela a operação silenciosamente para não quebrar o ERP
     if (!elNome || !elPreco) return;
 
     const id_maquina = elId ? elId.value : '';
@@ -124,7 +123,6 @@ async function adicionarMaquinaServidor() {
     const manutencao = elManutencao ? parseFloat(elManutencao.value) || 0 : 0;
     const horasAno = elHorasAno ? parseInt(elHorasAno.value) || 1 : 1;
     
-    // CORREÇÃO DA LINHA 105: Fallback seguro para 0 se o campo de energia não existir nesta aba
     const potencia_kw = elPotencia ? parseFloat(elPotencia.value) || 0 : 0;
     const tarifa_kwh = elTarifa ? parseFloat(elTarifa.value) || 0 : 0;
 
@@ -135,10 +133,21 @@ async function adicionarMaquinaServidor() {
 
     const metodo = id_maquina ? 'PUT' : 'POST';
 
+    // CORREÇÃO DA LINHA 141: Ajustado de 'horas_ano: horas_ano' para usar a variável correta 'horas_ano: horasAno'
     const response = await fetch('/api/maquinas', {
         method: metodo,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id_maquina, nome, preco, vida_util: vidaUtil, valor_revenda: valorRevenda, manutencao, horas_ano, potencia_kw, tarifa_kwh })
+        body: JSON.stringify({ 
+            id: id_maquina, 
+            nome: nome, 
+            preco: preco, 
+            vida_util: vidaUtil, 
+            valor_revenda: valorRevenda, 
+            manutencao: manutencao, 
+            horas_ano: horasAno, // Corrigido!
+            potencia_kw: potencia_kw, 
+            tarifa_kwh: tarifa_kwh 
+        })
     });
 
     if (response.ok) {
@@ -188,6 +197,7 @@ function carregarAtivoParaEdicao(id) {
     if (btnSalvar) btnSalvar.innerText = "Salvar Alterações no Banco";
     emitirAudioTexto("Ativo carregado para modificação.");
 }
+
 
 
 
