@@ -1,3 +1,4 @@
+
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -5,6 +6,7 @@ from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 
+# CONEXÃO COM O BANCO DE DADOS POSTGRESQL DO RENDER
 def obter_conexao_db():
     url_banco = os.environ.get('DATABASE_URL')
     if url_banco:
@@ -25,31 +27,40 @@ def inicializar_banco():
             cursor.close()
             conn.close()
         except Exception as e:
-            print(f"Erro no banco: {e}")
+            print(f"Erro na sincronização estrutural: {e}")
 
 inicializar_banco()
 
+# ROTAS MULTI-PÁGINAS PURAS (SEM ÂNCORAS OU HASHTAGS)
 @app.route('/')
-def index(): return render_template('index.html')
+def index():
+    return render_template('index.html')
 
 @app.route('/terreno')
-def pagina_terreno(): return render_template('terreno.html')
+def pagina_terreno():
+    return render_template('terreno.html')
 
 @app.route('/maquinas')
-def pagina_maquinas(): return render_template('maquinas.html')
+def pagina_maquinas():
+    return render_template('maquinas.html')
 
 @app.route('/processos')
-def pagina_processos(): return render_template('processos.html')
+def pagina_processos():
+    return render_template('processos.html')
 
 @app.route('/materiais')
-def pagina_materiais(): return render_template('materiais.html')
+def pagina_materiais():
+    return render_template('materiais.html')
 
 @app.route('/precificacao')
-def pagina_precificacao(): return render_template('precificacao.html')
+def pagina_precificacao():
+    return render_template('precificacao.html')
 
 @app.route('/retorno')
-def pagina_retorno(): return render_template('retorno.html')
+def pagina_retorno():
+    return render_template('retorno.html')
 
+# ENDPOINT: CONTROLAR INVESTIMENTOS DA PLANTA FISICA
 @app.route('/api/imobiliario', methods=['POST'])
 def salvar_imobiliario():
     data = request.get_json()
@@ -75,7 +86,8 @@ def salvar_imobiliario():
             conn.commit()
             cursor.close()
             conn.close()
-        except Exception as e: return jsonify({'error': str(e)}), 500
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
     return jsonify({
         'status': 'sucesso',
@@ -83,12 +95,29 @@ def salvar_imobiliario():
         'custoAnualTotal': round(custo_imobiliario_anual, 2),
         'custoMinutoInstalacao': round(custo_minuto_instalacao, 4)
     })
+
+
+
+# ENDPOINT: CRUD AVANÇADO DE ATIVOS E MÁQUINAS METALÚRGICAS (POSTGRES)
 @app.route('/api/maquinas', methods=['GET', 'POST', 'PUT'])
-def gerenciar_maquinas():
+@app.route('/api/maquinas/<int:maquina_id>', methods=['DELETE'])
+def gerenciar_maquinas(maquina_id=None):
     conn = obter_conexao_db()
-    if not conn: return jsonify([])
+    if not conn:
+        return jsonify([])
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     
+    # Tratamento de Deleção Física Exigida no Escopo Operacional
+    if request.method == 'DELETE' and maquina_id:
+        try:
+            cursor.execute("DELETE FROM maquinas WHERE id = %s;", (maquina_id,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'status': 'sucesso'})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+            
     if request.method in ['POST', 'PUT']:
         data = request.get_json()
         id_maquina = data.get('id')
@@ -100,17 +129,15 @@ def gerenciar_maquinas():
         horas_ano = int(data.get('horas_ano', 1))
         potencia = float(data.get('potencia_kw', 0))
         tarifa = float(data.get('tarifa_kwh', 0))
+        dt_aq = data.get('data_aquisicao')
+        dt_manut = data.get('data_manutencao')
+        diametro = float(data.get('diametro_mm', 0))
+        comprimento = float(data.get('comprimento_mm', 0))
         
-        # BLINDAGEM DE SINAL: Previne depreciação negativa se valor de revenda for maior
-        if valor_revenda > preco:
-            depreciacao_anual = 0
-        else:
-            depreciacao_anual = (preco - valor_revenda) / vida_util
-            
+        # Filtro de Sinal: Evita depreciação negativa
+        depreciacao_anual = (preco - valor_revenda) / vida_util if preco > valor_revenda else 0
         custo_fixo_anual = depreciacao_anual + manutencao
         minutos_ano = horas_ano * 60
-        
-        # Custo do Minuto Fixo + Custo do Minuto de Energia Elétrica (kW * Tarifa / 60 minutos)
         custo_energia_minuto = (potencia * tarifa) / 60.0
         custo_minuto = (custo_fixo_anual / minutos_ano) + custo_energia_minuto
 
@@ -118,23 +145,26 @@ def gerenciar_maquinas():
             if request.method == 'PUT' and id_maquina:
                 cursor.execute(
                     """UPDATE maquinas SET nome_maquina=%s, preco_compra=%s, tempo_vida_util_anos=%s, 
-                                          valor_revenda_estimado=%s, custo_manutencao_anual=%s, 
-                                          horas_ativas_ano=%s, potencia_kw=%s, tarifa_kwh=%s, custo_minuto_maquina=%s 
+                                          valor_revenda_estimado=%s, custo_manutencao_anual=%s, horas_ativas_ano=%s, 
+                                          potencia_kw=%s, tarifa_kwh=%s, data_aquisicao=%s, data_manutencao_preventiva=%s, 
+                                          diametro_trabalho_mm=%s, comprimento_trabalho_mm=%s, custo_minuto_maquina=%s 
                        WHERE id=%s;""",
-                    (nome, preco, vida_util, valor_revenda, manutencao, horas_ano, potencia, tarifa, custo_minuto, id_maquina)
+                    (nome, preco, vida_util, valor_revenda, manutencao, horas_ano, potencia, tarifa, dt_aq, dt_manut, diametro, comprimento, custo_minuto, id_maquina)
                 )
             else:
                 cursor.execute(
                     """INSERT INTO maquinas (nome_maquina, preco_compra, tempo_vida_util_anos, valor_revenda_estimado, 
-                                            custo_manutencao_anual, horas_ativas_ano, potencia_kw, tarifa_kwh, custo_minuto_maquina) 
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);""",
-                    (nome, preco, vida_util, valor_revenda, manutencao, horas_ano, potencia, tarifa, custo_minuto)
+                                            custo_manutencao_anual, horas_ativas_ano, potencia_kw, tarifa_kwh, 
+                                            data_aquisicao, data_manutencao_preventiva, diametro_trabalho_mm, comprimento_trabalho_mm, custo_minuto_maquina) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (nome, preco, vida_util, valor_revenda, manutencao, horas_ano, potencia, tarifa, dt_aq, dt_manut, diametro, comprimento, custo_minuto)
                 )
             conn.commit()
             cursor.close()
             conn.close()
-            return jsonify({'status': 'sucesso', 'custoMinuto': round(custo_minuto, 4)})
-        except Exception as e: return jsonify({'error': str(e)}), 500
+            return jsonify({'status': 'sucesso'})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
     cursor.execute("SELECT * FROM maquinas ORDER BY id DESC;")
     maquinas = cursor.fetchall()
@@ -149,12 +179,21 @@ def calcular_markup():
     margem_lucro = float(data.get('margem_lucro', 0))
     impostos = float(data.get('impostos', 0))
     denominador = 1 - ((margem_lucro + impostos) / 100)
-    if denominador <= 0: return jsonify({'error': 'Erro'}), 400
+    if denominador <= 0:
+        return jsonify({'error': 'Erro de margem'}), 400
     return jsonify({'markup': round(1/denominador, 2), 'preco_venda': round(custo_total * (1/denominador), 2)})
 
-@app.route('/api/holerite/<int:funcionario_id>/<int:mes>/<int:ano>', methods=['GET'])
-def gerar_holerite(funcionario_id, mes, ano):
-    return jsonify({'status': 'funcional'})
+@app.route('/api/funcionarios', methods=['GET'])
+def listar_funcionarios_rh():
+    conn = obter_conexao_db()
+    if not conn: return jsonify([])
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT * FROM funcionarios ORDER BY id DESC;")
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(res)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
